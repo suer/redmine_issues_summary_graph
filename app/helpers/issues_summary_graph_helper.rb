@@ -1,6 +1,7 @@
 module IssuesSummaryGraphHelper
   SUMMARY_IMAGE_WIDTH = 600
   SUMMARY_IMAGE_HEIGHT = 200
+  LINE_NUM = 10
 
   def generate_summary_graph
     imgl = Magick::ImageList.new
@@ -44,11 +45,6 @@ module IssuesSummaryGraphHelper
       end_date = Date.parse((sorted_open_issue_map[-1][0] > sorted_closed_issue_map[-1][0]) ? sorted_open_issue_map[-1][0] : sorted_closed_issue_map[-1][0])
     end
     duration = ((end_date - start_date))
-    logger.info "*************************************"
-    logger.info start_date
-    logger.info end_date
-    logger.info duration
-    logger.info "*************************************"
 
     draw_line(open_issue_map, start_date, duration, gc, 'red', issues.size)
     draw_line(closed_issue_map, start_date, duration, gc, 'black', issues.size)
@@ -57,6 +53,7 @@ module IssuesSummaryGraphHelper
       logger.info "#{key} #{value}"
     end
 
+    border(gc)
     gc.draw(imgl)
     imgl.format = 'PNG'
     imgl.to_blob
@@ -76,11 +73,17 @@ module IssuesSummaryGraphHelper
         y = SUMMARY_IMAGE_HEIGHT.to_f * (1 - (sum.to_f / issue_num.to_f))
       end
       gc.line(prev_x, prev_y, x, y)
-      logger.info "-------------------------------"
-      logger.info "i = #{i}, (x, y) = (#{x}, #{y}), date = #{(start_date + i).strftime('%Y%m%d')}, num = #{issue_map[(start_date + i).strftime('%Y%m%d')]}"
-      logger.info "-------------------------------"
       prev_x = x
       prev_y = y
+    end
+  end
+
+  def border(gc)
+    gc.fill('lightgray')
+    gc.line(0, 1, SUMMARY_IMAGE_WIDTH, 1)
+    LINE_NUM.times do |i|
+      height = (i == 0 ? (SUMMARY_IMAGE_HEIGHT-1) : (SUMMARY_IMAGE_HEIGHT / LINE_NUM) * i)
+      gc.line(0, height, SUMMARY_IMAGE_WIDTH, height)
     end
   end
 
