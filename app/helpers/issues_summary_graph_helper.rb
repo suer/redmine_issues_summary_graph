@@ -79,10 +79,12 @@ module IssuesSummaryGraphHelper
   end
 
   def border(gc, issue_num)
-    logger.info (issue_num / LINE_NUM).to_i
-    logger.info (10 ** (issue_num / LINE_NUM).to_i.to_s.size - 1)
-    margin = ((issue_num / LINE_NUM).to_i + (10 ** ((issue_num / LINE_NUM).to_i.to_s.size - 1))) * (10 ** ((issue_num / LINE_NUM).to_i.to_s.size ))
-    step = (issue_num / LINE_NUM).to_i + 10 ** ((issue_num / LINE_NUM).to_i.to_s.size - 1)
+    step = (issue_num / LINE_NUM).to_i
+    margin = (SUMMARY_IMAGE_HEIGHT / LINE_NUM).to_i
+    round_step = step + 10 ** (step.to_s.size - 2)
+    logger.info step
+    logger.info margin
+    logger.info round_step
 
     gc.fill('lightgray')
     gc.line(PADDING_LEFT, 1, SUMMARY_IMAGE_WIDTH, 1)
@@ -94,7 +96,7 @@ module IssuesSummaryGraphHelper
       gc.line(PADDING_LEFT, SUMMARY_IMAGE_HEIGHT - margin * i, SUMMARY_IMAGE_WIDTH, SUMMARY_IMAGE_HEIGHT - margin * i)
       gc.fill('black')
       logger.info "#{issue_num} * #{margin} / #{SUMMARY_IMAGE_HEIGHT}"
-      gc.text(0, SUMMARY_IMAGE_HEIGHT - margin * i, (step * i).to_i.to_s)
+      gc.text(0, SUMMARY_IMAGE_HEIGHT - margin * i, (round_step * i).to_i.to_s)
     end
     gc.fill('lightgray')
     gc.line(PADDING_LEFT, SUMMARY_IMAGE_HEIGHT - 1, SUMMARY_IMAGE_WIDTH, SUMMARY_IMAGE_HEIGHT - 1)
