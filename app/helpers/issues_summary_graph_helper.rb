@@ -53,6 +53,10 @@ module IssuesSummaryGraphHelper
     draw_line(open_issue_map, start_date, duration, gc, 'red', issues.size)
     draw_line(closed_issue_map, start_date, duration, gc, 'black', issues.size)
 
+    closed_issue_map.each do |key, value|
+      logger.info "#{key} #{value}"
+    end
+
     gc.draw(imgl)
     imgl.format = 'PNG'
     imgl.to_blob
@@ -65,13 +69,11 @@ module IssuesSummaryGraphHelper
     prev_x = 0
     prev_y = SUMMARY_IMAGE_HEIGHT
     sum = 0
-    duration.to_i.times do |i|
-      x += (SUMMARY_IMAGE_WIDTH / duration)
+    (duration + 1).to_i.times do |i|
+      x += (SUMMARY_IMAGE_WIDTH / (duration + 1))
       sum += issue_map[(start_date + i).strftime('%Y%m%d')] || 0
       if issue_map[(start_date + i).strftime('%Y%m%d')]
         y = SUMMARY_IMAGE_HEIGHT.to_f * (1 - (sum.to_f / issue_num.to_f))
-      else
-        y = prev_y
       end
       gc.line(prev_x, prev_y, x, y)
       logger.info "-------------------------------"
