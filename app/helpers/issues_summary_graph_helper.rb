@@ -64,12 +64,18 @@ module IssuesSummaryGraphHelper
     y = SUMMARY_IMAGE_HEIGHT
     prev_x = 0
     prev_y = SUMMARY_IMAGE_HEIGHT
+    sum = 0
     duration.to_i.times do |i|
       x += (SUMMARY_IMAGE_WIDTH / duration)
-      y = SUMMARY_IMAGE_HEIGHT - ((issue_map[(start_date + 1).strftime('%Y%m%d')] * SUMMARY_IMAGE_HEIGHT) / issue_num) || 0
+      sum += issue_map[(start_date + i).strftime('%Y%m%d')] || 0
+      if issue_map[(start_date + i).strftime('%Y%m%d')]
+        y = SUMMARY_IMAGE_HEIGHT.to_f * (1 - (sum.to_f / issue_num.to_f))
+      else
+        y = prev_y
+      end
       gc.line(prev_x, prev_y, x, y)
       logger.info "-------------------------------"
-      logger.info "i = #{i}, (x, y) = (#{x}, #{y})"
+      logger.info "i = #{i}, (x, y) = (#{x}, #{y}), date = #{(start_date + i).strftime('%Y%m%d')}, num = #{issue_map[(start_date + i).strftime('%Y%m%d')]}"
       logger.info "-------------------------------"
       prev_x = x
       prev_y = y
