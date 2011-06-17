@@ -50,15 +50,15 @@ module IssuesSummaryGraphHelper
     logger.info duration
     logger.info "*************************************"
 
-    draw_line(open_issue_map, start_date, duration, gc, 'red')
-    draw_line(closed_issue_map, start_date, duration, gc, 'black')
+    draw_line(open_issue_map, start_date, duration, gc, 'red', issues.size)
+    draw_line(closed_issue_map, start_date, duration, gc, 'black', issues.size)
 
     gc.draw(imgl)
     imgl.format = 'PNG'
     imgl.to_blob
   end
 
-  def draw_line(issue_map, start_date, duration, gc, color)
+  def draw_line(issue_map, start_date, duration, gc, color, issue_num)
     gc.fill(color)
     x = 0
     y = SUMMARY_IMAGE_HEIGHT
@@ -66,7 +66,7 @@ module IssuesSummaryGraphHelper
     prev_y = SUMMARY_IMAGE_HEIGHT
     duration.to_i.times do |i|
       x += (SUMMARY_IMAGE_WIDTH / duration)
-      y -= issue_map[(start_date + 1).strftime('%Y%m%d')] || 0
+      y = SUMMARY_IMAGE_HEIGHT - ((issue_map[(start_date + 1).strftime('%Y%m%d')] * SUMMARY_IMAGE_HEIGHT) / issue_num) || 0
       gc.line(prev_x, prev_y, x, y)
       logger.info "-------------------------------"
       logger.info "i = #{i}, (x, y) = (#{x}, #{y})"
