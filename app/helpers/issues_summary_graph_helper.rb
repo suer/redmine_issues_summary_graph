@@ -82,7 +82,7 @@ module IssuesSummaryGraphHelper
     logger.info (issue_num / LINE_NUM).to_i
     logger.info (10 ** (issue_num / LINE_NUM).to_i.to_s.size - 1)
     margin = ((issue_num / LINE_NUM).to_i + (10 ** ((issue_num / LINE_NUM).to_i.to_s.size - 1))) * (10 ** ((issue_num / LINE_NUM).to_i.to_s.size ))
-    step = (issue_num * margin / SUMMARY_IMAGE_HEIGHT) + 1
+    step = (issue_num / LINE_NUM).to_i + 10 ** ((issue_num / LINE_NUM).to_i.to_s.size - 1)
 
     gc.fill('lightgray')
     gc.line(PADDING_LEFT, 1, SUMMARY_IMAGE_WIDTH, 1)
