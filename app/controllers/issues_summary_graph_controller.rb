@@ -1,10 +1,12 @@
 class IssuesSummaryGraphController < ApplicationController
   unloadable
 
-  before_filter :find_project, :only => [:show]
+  before_filter :find_project
 
   def show
+  end
 
+  def summary_graph
     respond_to do |format|
       format.png  { send_data(generate_summary_graph, :disposition => 'inline', :type => 'image/png', :filename => "summary.png") }
     end

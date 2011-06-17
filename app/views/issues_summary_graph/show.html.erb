@@ -1,2 +1,4 @@
 <h1><%= l(:menu_issues_summary_graph) %></h1>
 
+<%= image_tag(url_for(:controller => 'issues_summary_graph', :action => 'summary_graph', :project_id => @project.identifier, :format => 'png')) %>
+
