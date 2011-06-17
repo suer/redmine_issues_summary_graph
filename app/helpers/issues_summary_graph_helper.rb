@@ -1,5 +1,5 @@
 module IssuesSummaryGraphHelper
-  SUMMARY_IMAGE_WIDTH = 240
+  SUMMARY_IMAGE_WIDTH = 600
   SUMMARY_IMAGE_HEIGHT = 200
 
   def generate_summary_graph
