@@ -8,9 +8,10 @@ module IssuesSummaryGraphHelper
     imgl.new_image(SUMMARY_IMAGE_WIDTH, SUMMARY_IMAGE_HEIGHT)
     gc = Magick::Draw.new
 
+    border(gc)
+
     gc.stroke('transparent')
     gc.fill('black')
-
     closed_issue_status_ids = IssueStatus.find(:all, :conditions => ['is_closed = ?', true]).map {|st| st.id}
     closed_issue_map = {}
     open_issue_map = {}
@@ -53,7 +54,6 @@ module IssuesSummaryGraphHelper
       logger.info "#{key} #{value}"
     end
 
-    border(gc)
     gc.draw(imgl)
     imgl.format = 'PNG'
     imgl.to_blob
