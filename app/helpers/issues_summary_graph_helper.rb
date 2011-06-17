@@ -2,13 +2,12 @@ module IssuesSummaryGraphHelper
   SUMMARY_IMAGE_WIDTH = 600
   SUMMARY_IMAGE_HEIGHT = 200
   LINE_NUM = 10
+  PADDING_LEFT = 40
 
   def generate_summary_graph
     imgl = Magick::ImageList.new
     imgl.new_image(SUMMARY_IMAGE_WIDTH, SUMMARY_IMAGE_HEIGHT)
     gc = Magick::Draw.new
-
-    border(gc)
 
     gc.stroke('transparent')
     gc.fill('black')
@@ -49,6 +48,7 @@ module IssuesSummaryGraphHelper
 
     draw_line(open_issue_map, start_date, duration, gc, 'red', issues.size)
     draw_line(closed_issue_map, start_date, duration, gc, 'black', issues.size)
+    border(gc, issues.size)
 
     closed_issue_map.each do |key, value|
       logger.info "#{key} #{value}"
@@ -61,13 +61,13 @@ module IssuesSummaryGraphHelper
 
   def draw_line(issue_map, start_date, duration, gc, color, issue_num)
     gc.fill(color)
-    x = 0
+    x = PADDING_LEFT
     y = SUMMARY_IMAGE_HEIGHT
-    prev_x = 0
+    prev_x = PADDING_LEFT
     prev_y = SUMMARY_IMAGE_HEIGHT
     sum = 0
     (duration + 1).to_i.times do |i|
-      x += (SUMMARY_IMAGE_WIDTH / (duration + 1))
+      x += ((SUMMARY_IMAGE_WIDTH - PADDING_LEFT) / (duration + 1))
       sum += issue_map[(start_date + i).strftime('%Y%m%d')] || 0
       if issue_map[(start_date + i).strftime('%Y%m%d')]
         y = SUMMARY_IMAGE_HEIGHT.to_f * (1 - (sum.to_f / issue_num.to_f))
@@ -78,13 +78,28 @@ module IssuesSummaryGraphHelper
     end
   end
 
-  def border(gc)
+  def border(gc, issue_num)
+    logger.info (issue_num / LINE_NUM).to_i
+    logger.info (10 ** (issue_num / LINE_NUM).to_i.to_s.size - 1)
+    margin = ((issue_num / LINE_NUM).to_i + (10 ** ((issue_num / LINE_NUM).to_i.to_s.size - 1))) * (10 ** ((issue_num / LINE_NUM).to_i.to_s.size ))
+    step = (issue_num * margin / SUMMARY_IMAGE_HEIGHT) + 1
+
     gc.fill('lightgray')
-    gc.line(0, 1, SUMMARY_IMAGE_WIDTH, 1)
+    gc.line(PADDING_LEFT, 1, SUMMARY_IMAGE_WIDTH, 1)
+    gc.fill('black')
+    gc.text(0, 1, issue_num.to_s)
     LINE_NUM.times do |i|
       height = (i == 0 ? (SUMMARY_IMAGE_HEIGHT-1) : (SUMMARY_IMAGE_HEIGHT / LINE_NUM) * i)
-      gc.line(0, height, SUMMARY_IMAGE_WIDTH, height)
+      gc.fill('lightgray')
+      gc.line(PADDING_LEFT, SUMMARY_IMAGE_HEIGHT - margin * i, SUMMARY_IMAGE_WIDTH, SUMMARY_IMAGE_HEIGHT - margin * i)
+      gc.fill('black')
+      logger.info "#{issue_num} * #{margin} / #{SUMMARY_IMAGE_HEIGHT}"
+      gc.text(0, SUMMARY_IMAGE_HEIGHT - margin * i, (step * i).to_i.to_s)
     end
+    gc.fill('lightgray')
+    gc.line(PADDING_LEFT, SUMMARY_IMAGE_HEIGHT - 1, SUMMARY_IMAGE_WIDTH, SUMMARY_IMAGE_HEIGHT - 1)
+    gc.fill('black')
+    gc.text(0, SUMMARY_IMAGE_HEIGHT - 1, '0')
   end
 
   def issue_closed_date(issue, closed_issue_status_ids)
