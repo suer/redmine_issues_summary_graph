@@ -80,12 +80,9 @@ module IssuesSummaryGraphHelper
 
   def border(gc, issue_num)
     step = (issue_num / LINE_NUM).to_i
+    step = round_half(step) 
     margin = (SUMMARY_IMAGE_HEIGHT / LINE_NUM).to_i
     round_step = step + 10 ** (step.to_s.size - 2)
-    logger.info step
-    logger.info margin
-    logger.info round_step
-
     gc.fill('lightgray')
     gc.line(PADDING_LEFT, 1, SUMMARY_IMAGE_WIDTH, 1)
     gc.fill('black')
@@ -95,7 +92,6 @@ module IssuesSummaryGraphHelper
       gc.fill('lightgray')
       gc.line(PADDING_LEFT, SUMMARY_IMAGE_HEIGHT - margin * i, SUMMARY_IMAGE_WIDTH, SUMMARY_IMAGE_HEIGHT - margin * i)
       gc.fill('black')
-      logger.info "#{issue_num} * #{margin} / #{SUMMARY_IMAGE_HEIGHT}"
       gc.text(0, SUMMARY_IMAGE_HEIGHT - margin * i, (round_step * i).to_i.to_s)
     end
     gc.fill('lightgray')
@@ -104,6 +100,11 @@ module IssuesSummaryGraphHelper
     gc.text(0, SUMMARY_IMAGE_HEIGHT - 1, '0')
   end
 
+  def round_half(num)
+    return num if num.to_s.size == 1
+    upper_double_digit = num / 10 ** (num.to_s.size - 2)
+    ((upper_double_digit % 10 < 5) ? (upper_double_digit / 10) : (upper_double_digit / 10 + 1)) * (10 ** num.to_s.size - 1)
+  end
   def issue_closed_date(issue, closed_issue_status_ids)
     issue.journals.each do |journal|
       journal.details.each do |detail|
