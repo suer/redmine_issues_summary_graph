@@ -1,8 +1,8 @@
 module IssuesSummaryGraphHelper
   SUMMARY_IMAGE_WIDTH = 600
-  SUMMARY_IMAGE_HEIGHT = 200
+  SUMMARY_IMAGE_HEIGHT = 300
   LINE_NUM = 10
-  PADDING_LEFT = 40
+  PADDING = 40
 
   def generate_summary_graph
     imgl = Magick::ImageList.new
@@ -50,61 +50,68 @@ module IssuesSummaryGraphHelper
     draw_line(closed_issue_map, start_date, duration, gc, 'black', issues.size)
     border(gc, issues.size)
 
-    closed_issue_map.each do |key, value|
-      logger.info "#{key} #{value}"
-    end
-
     gc.draw(imgl)
     imgl.format = 'PNG'
     imgl.to_blob
   end
 
   def draw_line(issue_map, start_date, duration, gc, color, issue_num)
-    gc.fill(color)
-    x = PADDING_LEFT
-    y = SUMMARY_IMAGE_HEIGHT
-    prev_x = PADDING_LEFT
-    prev_y = SUMMARY_IMAGE_HEIGHT
+    top_issue_num = border_step(issue_num) * LINE_NUM
+    x = PADDING
+    y = SUMMARY_IMAGE_HEIGHT - PADDING
+    prev_x = PADDING
+    prev_y = SUMMARY_IMAGE_HEIGHT - PADDING
     sum = 0
     (duration + 1).to_i.times do |i|
-      x += ((SUMMARY_IMAGE_WIDTH - PADDING_LEFT) / (duration + 1))
+      x += ((SUMMARY_IMAGE_WIDTH - PADDING * 2) / (duration + 1))
       sum += issue_map[(start_date + i).strftime('%Y%m%d')] || 0
       if issue_map[(start_date + i).strftime('%Y%m%d')]
-        y = SUMMARY_IMAGE_HEIGHT.to_f * (1 - (sum.to_f / issue_num.to_f))
+        y = (SUMMARY_IMAGE_HEIGHT - PADDING).to_f * (1 - (sum.to_f / top_issue_num.to_f))
       end
+      gc.fill(color)
       gc.line(prev_x, prev_y, x, y)
+      if (start_date + i).strftime('%d') == '01'
+        gc.fill('black')
+        gc.text(x.to_i - 20, SUMMARY_IMAGE_HEIGHT - 20, (start_date + i).strftime('%Y/%m')) 
+        gc.fill('lightgray')
+        gc.line(x.to_i, 0, x.to_i, SUMMARY_IMAGE_HEIGHT - PADDING)
+      end
       prev_x = x
       prev_y = y
     end
   end
 
   def border(gc, issue_num)
-    step = (issue_num / LINE_NUM).to_i
-    step = round_half(step) 
-    margin = (SUMMARY_IMAGE_HEIGHT / LINE_NUM).to_i
-    round_step = step + 10 ** (step.to_s.size - 2)
-    gc.fill('lightgray')
-    gc.line(PADDING_LEFT, 1, SUMMARY_IMAGE_WIDTH, 1)
-    gc.fill('black')
-    gc.text(0, 1, issue_num.to_s)
-    LINE_NUM.times do |i|
-      height = (i == 0 ? (SUMMARY_IMAGE_HEIGHT-1) : (SUMMARY_IMAGE_HEIGHT / LINE_NUM) * i)
+    margin = ((SUMMARY_IMAGE_HEIGHT - PADDING) / LINE_NUM).to_i
+    step = border_step(issue_num)
+    (LINE_NUM + 1).times do |i|
+      height = (i == 0 ? (SUMMARY_IMAGE_HEIGHT - PADDING - 1) : ((SUMMARY_IMAGE_HEIGHT - PADDING * 2) / LINE_NUM) * i)
       gc.fill('lightgray')
-      gc.line(PADDING_LEFT, SUMMARY_IMAGE_HEIGHT - margin * i, SUMMARY_IMAGE_WIDTH, SUMMARY_IMAGE_HEIGHT - margin * i)
+      gc.line(PADDING, (SUMMARY_IMAGE_HEIGHT - PADDING) - margin * i + 1, SUMMARY_IMAGE_WIDTH - PADDING, (SUMMARY_IMAGE_HEIGHT - PADDING) - margin * i)
       gc.fill('black')
-      gc.text(0, SUMMARY_IMAGE_HEIGHT - margin * i, (round_step * i).to_i.to_s)
+      gc.text(0, (SUMMARY_IMAGE_HEIGHT - PADDING) - margin * i, (step * i).to_i.to_s) if i != LINE_NUM
     end
     gc.fill('lightgray')
-    gc.line(PADDING_LEFT, SUMMARY_IMAGE_HEIGHT - 1, SUMMARY_IMAGE_WIDTH, SUMMARY_IMAGE_HEIGHT - 1)
+    gc.line(PADDING, (SUMMARY_IMAGE_HEIGHT - PADDING) - 1, SUMMARY_IMAGE_WIDTH - PADDING, (SUMMARY_IMAGE_HEIGHT - PADDING) - 1)
     gc.fill('black')
-    gc.text(0, SUMMARY_IMAGE_HEIGHT - 1, '0')
+    gc.text(0, (SUMMARY_IMAGE_HEIGHT - PADDING) - 1, '0')
+    gc.fill('lightgray')
+    gc.line(PADDING, 0, PADDING, (SUMMARY_IMAGE_HEIGHT - PADDING))
+    gc.line(SUMMARY_IMAGE_WIDTH - PADDING, 0, SUMMARY_IMAGE_WIDTH- PADDING, (SUMMARY_IMAGE_HEIGHT - PADDING))
   end
 
-  def round_half(num)
-    return num if num.to_s.size == 1
-    upper_double_digit = num / 10 ** (num.to_s.size - 2)
-    ((upper_double_digit % 10 < 5) ? (upper_double_digit / 10) : (upper_double_digit / 10 + 1)) * (10 ** num.to_s.size - 1)
+  def border_step(issue_num)
+    return issue_num if issue_num.to_s.size == 1
+    upper_double_digit = (issue_num.to_f / (10 ** (issue_num.to_s.size - 2)).to_f).ceil
+    if upper_double_digit % 10 == 0
+      upper_double_digit / 10
+    elsif upper_double_digit % 10 <= 5
+      upper_double_digit / 10 * 10 + 5
+    else
+      upper_double_digit / 10 * 10 + 10
+    end
   end
+
   def issue_closed_date(issue, closed_issue_status_ids)
     issue.journals.each do |journal|
       journal.details.each do |detail|
