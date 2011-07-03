@@ -4,14 +4,13 @@ module IssuesSummaryGraphHelper
   LINE_NUM = 10
   PADDING = 40
 
-  def generate_summary_graph
+  def generate_summary_graph(closed_issue_status_ids)
     imgl = Magick::ImageList.new
     imgl.new_image(SUMMARY_IMAGE_WIDTH, SUMMARY_IMAGE_HEIGHT)
     gc = Magick::Draw.new
 
     gc.stroke('transparent')
     gc.fill('black')
-    closed_issue_status_ids = IssueStatus.find(:all, :conditions => ['is_closed = ?', true]).map {|st| st.id}
     closed_issue_map = {}
     open_issue_map = {}
     issues = @project.issues
@@ -28,6 +27,10 @@ module IssuesSummaryGraphHelper
 
     sorted_open_issue_map = open_issue_map.sort
     sorted_closed_issue_map = closed_issue_map.sort
+    logger.info "========"
+    logger.info "#{sorted_open_issue_map.size}"
+    logger.info "#{sorted_closed_issue_map.size}"
+
     if sorted_open_issue_map.length == 0 and sorted_closed_issue_map.length == 0
       gc.draw(imgl)
       imgl.format = 'PNG'
@@ -38,7 +41,7 @@ module IssuesSummaryGraphHelper
       start_date = Date.parse(sorted_closed_issue_map[0][0])
       end_date = Date.parse(sorted_closed_issue_map[-1][0])
     elsif sorted_closed_issue_map.length == 0 
-      start_date = Date.parse(sorted_sorted_open_issue_map[0][0])
+      start_date = Date.parse(sorted_open_issue_map[0][0])
       end_date = Date.parse(sorted_open_issue_map[-1][0])
     else
       start_date = Date.parse((sorted_open_issue_map[0][0] < sorted_closed_issue_map[0][0]) ? sorted_open_issue_map[0][0] : sorted_closed_issue_map[0][0])
@@ -120,7 +123,7 @@ module IssuesSummaryGraphHelper
     issue.journals.each do |journal|
       journal.details.each do |detail|
         next unless detail.prop_key == 'status_id'
-        if closed_issue_status_ids.include?(detail.value.to_i)
+        if closed_issue_status_ids.include?(detail.value.to_i) 
           return journal.created_on
         end
       end

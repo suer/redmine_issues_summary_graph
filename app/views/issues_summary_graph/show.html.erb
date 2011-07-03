@@ -1,4 +1,16 @@
 <h1><%= l(:menu_issues_summary_graph) %></h1>
-
-<%= image_tag(url_for(:controller => 'issues_summary_graph', :action => 'summary_graph', :project_id => @project.identifier, :format => 'png')) %>
-
+<table>
+<tr>
+<td>
+<% form_tag :action => 'show' do |f| %>
+  <%= select_tag :closed_status_ids,
+     options_for_select(IssueStatus.find(:all).collect {|status| [status.name, status.id]}, @closed_status_ids),
+     :multiple => true, :name => 'closed_status_ids[]' %>
+  <%= submit_tag 'reload' %>
+<% end %>
+</td>
+<td>
+<%= image_tag(url_for(:controller => 'issues_summary_graph', :action => 'summary_graph', :project_id => @project.identifier, :closed_issue_statuses => @closed_status_ids, :format => 'png')) %>
+</td>
+</tr>
+</table>
