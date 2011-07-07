@@ -27,10 +27,6 @@ module IssuesSummaryGraphHelper
 
     sorted_open_issue_map = open_issue_map.sort
     sorted_closed_issue_map = closed_issue_map.sort
-    logger.info "========"
-    logger.info "#{sorted_open_issue_map.size}"
-    logger.info "#{sorted_closed_issue_map.size}"
-
     if sorted_open_issue_map.length == 0 and sorted_closed_issue_map.length == 0
       gc.draw(imgl)
       imgl.format = 'PNG'
@@ -49,8 +45,8 @@ module IssuesSummaryGraphHelper
     end
     duration = ((end_date - start_date))
 
-    draw_line(open_issue_map, start_date, duration, gc, 'red', issues.size)
-    draw_line(closed_issue_map, start_date, duration, gc, 'black', issues.size)
+    draw_line(open_issue_map, start_date, duration, gc, '#ffb6c1', issues.size)
+    draw_line(closed_issue_map, start_date, duration, gc, '#eee', issues.size)
     border(gc, issues.size)
 
     gc.draw(imgl)
@@ -60,24 +56,33 @@ module IssuesSummaryGraphHelper
 
   def draw_line(issue_map, start_date, duration, gc, color, issue_num)
     top_issue_num = border_step(issue_num) * LINE_NUM
-    x = PADDING
-    y = SUMMARY_IMAGE_HEIGHT - PADDING
-    prev_x = PADDING
-    prev_y = SUMMARY_IMAGE_HEIGHT - PADDING
+    x_base = PADDING
+    y_base = SUMMARY_IMAGE_HEIGHT - PADDING
+    x = x_base
+    y = y_base 
+    prev_x = x
+    prev_y = y
     sum = 0
     (duration + 1).to_i.times do |i|
       x += ((SUMMARY_IMAGE_WIDTH - PADDING * 2) / (duration + 1))
       sum += issue_map[(start_date + i).strftime('%Y%m%d')] || 0
       if issue_map[(start_date + i).strftime('%Y%m%d')]
-        y = (SUMMARY_IMAGE_HEIGHT - PADDING).to_f * (1 - (sum.to_f / top_issue_num.to_f))
+        y = y_base.to_f * (1 - (sum.to_f / top_issue_num.to_f))
       end
       gc.fill(color)
       gc.line(prev_x, prev_y, x, y)
+      gc.fill_opacity(0.9)
+      prev_x.to_i.upto(x.to_i) do |tmp_x|
+        tmp_y = (prev_y - y) / (prev_x - x) * tmp_x + y - (prev_y - y) / (prev_x - x) * x
+        gc.line(tmp_x, tmp_y, tmp_x, y_base)
+      end
+      gc.fill_opacity(1.0)
+      gc.line(prev_x, y_base, prev_x, prev_y)
       if (start_date + i).strftime('%d') == '01'
         gc.fill('black')
         gc.text(x.to_i - 20, SUMMARY_IMAGE_HEIGHT - 20, (start_date + i).strftime('%Y/%m')) 
         gc.fill('lightgray')
-        gc.line(x.to_i, 0, x.to_i, SUMMARY_IMAGE_HEIGHT - PADDING)
+        gc.line(x.to_i, 0, x.to_i, y_base)
       end
       prev_x = x
       prev_y = y
@@ -121,6 +126,9 @@ module IssuesSummaryGraphHelper
 
   def issue_closed_date(issue, closed_issue_status_ids)
     issue.journals.each do |journal|
+      if journal.details.size == 0
+        return (closed_issue_status_ids.include?(issue.status.id) ? issue.updated_on : nil) 
+      end
       journal.details.each do |detail|
         next unless detail.prop_key == 'status_id'
         if closed_issue_status_ids.include?(detail.value.to_i) 
