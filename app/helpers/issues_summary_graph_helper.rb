@@ -46,13 +46,11 @@ module IssuesSummaryGraphHelper
       start_date = Date.parse((sorted_open_issue_map[0][0] < sorted_closed_issue_map[0][0]) ? sorted_open_issue_map[0][0] : sorted_closed_issue_map[0][0])
       end_date = Date.parse((sorted_open_issue_map[-1][0] > sorted_closed_issue_map[-1][0]) ? sorted_open_issue_map[-1][0] : sorted_closed_issue_map[-1][0])
     end
-    duration = ((end_date - start_date))
+    duration = (end_date - start_date)
     draw_line(open_issue_map, start_date, duration, gc, COLOR_ALL, issues.size)
     draw_line(closed_issue_map, start_date, duration, gc, COLOR_CLOSED, issues.size)
     border(gc, issues.size)
-    gc.fill('black')
-    gc.text(PADDING + 45, 25, 'all') 
-    gc.text(PADDING + 45, 45, 'closed') 
+    gc.stroke('transparent').fill('black').text(PADDING + 45, 25, 'all').text(PADDING + 45, 45, 'closed') 
     gc.stroke(COLOR_ALL).stroke_width(3).fill(COLOR_ALL).line(PADDING + 10, 20, PADDING + 40, 20)
     gc.stroke(COLOR_CLOSED).stroke_width(3).fill(COLOR_CLOSED).line(PADDING + 10, 40, PADDING + 40, 40)
 
@@ -78,41 +76,42 @@ module IssuesSummaryGraphHelper
       end
       gc.fill(color)
       gc.line(prev_x, prev_y, x, y)
-      gc.fill_opacity(0.9)
+      gc.fill_opacity(0.7)
       prev_x.to_i.upto(x.to_i) do |tmp_x|
         tmp_y = (prev_y - y) / (prev_x - x) * tmp_x + y - (prev_y - y) / (prev_x - x) * x
-        gc.line(tmp_x, tmp_y, tmp_x, y_base)
+        gc.stroke('transparent').stroke_width(1).line(tmp_x, tmp_y, tmp_x, y_base)
       end
       gc.fill_opacity(1.0)
       gc.line(prev_x, y_base, prev_x, prev_y)
       if (start_date + i).strftime('%d') == '01'
-        gc.fill('black')
-        gc.text(x.to_i - 20, SUMMARY_IMAGE_HEIGHT - 20, (start_date + i).strftime('%Y/%m')) 
-        gc.fill('lightgray')
-        gc.line(x.to_i, 0, x.to_i, y_base)
+        gc.stroke('transparent').stroke_width(1)
+        gc.fill('black').text(x.to_i - 20, SUMMARY_IMAGE_HEIGHT - 20, (start_date + i).strftime('%Y/%m'))
+        gc.fill('lightgray').line(x.to_i, 0, x.to_i, y_base)
       end
+
+      gc.stroke(color).stroke_width(2).fill(color).line(prev_x, prev_y, x, y)
       prev_x = x
       prev_y = y
     end
   end
 
   def border(gc, issue_num)
-    margin = ((SUMMARY_IMAGE_HEIGHT - PADDING) / LINE_NUM).to_i
+    graph_height = SUMMARY_IMAGE_HEIGHT - PADDING
+    graph_width = SUMMARY_IMAGE_WIDTH- PADDING
+    margin = (graph_height / LINE_NUM).to_i
     step = border_step(issue_num)
     (LINE_NUM + 1).times do |i|
-      height = (i == 0 ? (SUMMARY_IMAGE_HEIGHT - PADDING - 1) : ((SUMMARY_IMAGE_HEIGHT - PADDING * 2) / LINE_NUM) * i)
-      gc.fill('lightgray')
-      gc.line(PADDING, (SUMMARY_IMAGE_HEIGHT - PADDING) - margin * i + 1, SUMMARY_IMAGE_WIDTH - PADDING, (SUMMARY_IMAGE_HEIGHT - PADDING) - margin * i)
-      gc.fill('black')
-      gc.text(0, (SUMMARY_IMAGE_HEIGHT - PADDING) - margin * i, (step * i).to_i.to_s) if i != LINE_NUM
+      height = (i == 0 ? (graph_height - 1) : ((graph_height - PADDING) / LINE_NUM) * i)
+      gc.stroke('transparent').stroke_width(1).fill('lightgray')
+      gc.line(PADDING, graph_height - margin * i + 1, graph_width, graph_height - margin * i)
+      gc.stroke('transparent').stroke_width(1).fill('black')
+      gc.text(0, graph_height - margin * i, (step * i).to_i.to_s) if i != LINE_NUM
     end
-    gc.fill('lightgray')
-    gc.line(PADDING, (SUMMARY_IMAGE_HEIGHT - PADDING) - 1, SUMMARY_IMAGE_WIDTH - PADDING, (SUMMARY_IMAGE_HEIGHT - PADDING) - 1)
-    gc.fill('black')
-    gc.text(0, (SUMMARY_IMAGE_HEIGHT - PADDING) - 1, '0')
-    gc.fill('lightgray')
-    gc.line(PADDING, 0, PADDING, (SUMMARY_IMAGE_HEIGHT - PADDING))
-    gc.line(SUMMARY_IMAGE_WIDTH - PADDING, 0, SUMMARY_IMAGE_WIDTH- PADDING, (SUMMARY_IMAGE_HEIGHT - PADDING))
+    gc.stroke('transparent').fill('lightgray')
+    gc.line(PADDING, graph_height - 1, graph_width, graph_height - 1)
+    gc.stroke('transparent').fill('black').text(0, graph_height - 1, '0')
+    gc.stroke('transparent').fill('lightgray').line(PADDING, 0, PADDING, graph_height)
+    gc.line(graph_width, 0, graph_width, graph_height)
   end
 
   def border_step(issue_num)
