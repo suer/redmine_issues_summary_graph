@@ -21,6 +21,7 @@ module IssuesSummaryGraphHelper
       open_issue_map[issue.created_on.strftime('%Y%m%d')] += 1 
 
       closed_date = issue_closed_date(issue, closed_issue_status_ids)
+      logger.info "#{issue.id}: #{closed_date}"
       if closed_date
         closed_issue_map[closed_date.strftime('%Y%m%d')] ||= 0
         closed_issue_map[closed_date.strftime('%Y%m%d')] += 1
@@ -142,6 +143,6 @@ module IssuesSummaryGraphHelper
         end
       end
     end
-    nil
+    closed_issue_status_ids.include?(issue.status.id) ? issue.updated_on : nil
   end
 end
