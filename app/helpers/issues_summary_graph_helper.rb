@@ -21,7 +21,6 @@ module IssuesSummaryGraphHelper
       open_issue_map[issue.created_on.strftime('%Y%m%d')] += 1 
 
       closed_date = issue_closed_date(issue, closed_issue_status_ids)
-      logger.info "#{issue.id}: #{closed_date}"
       if closed_date
         closed_issue_map[closed_date.strftime('%Y%m%d')] ||= 0
         closed_issue_map[closed_date.strftime('%Y%m%d')] += 1
@@ -47,9 +46,9 @@ module IssuesSummaryGraphHelper
       end_date = Date.parse((sorted_open_issue_map[-1][0] > sorted_closed_issue_map[-1][0]) ? sorted_open_issue_map[-1][0] : sorted_closed_issue_map[-1][0])
     end
     duration = (end_date - start_date)
+    border(gc, issues.size)
     draw_line(open_issue_map, start_date, duration, gc, COLOR_ALL, issues.size)
     draw_line(closed_issue_map, start_date, duration, gc, COLOR_CLOSED, issues.size)
-    border(gc, issues.size)
     gc.stroke('transparent').fill('black').text(PADDING + 45, 25, 'all').text(PADDING + 45, 45, 'closed') 
     gc.stroke(COLOR_ALL).stroke_width(3).fill(COLOR_ALL).line(PADDING + 10, 20, PADDING + 40, 20)
     gc.stroke(COLOR_CLOSED).stroke_width(3).fill(COLOR_CLOSED).line(PADDING + 10, 40, PADDING + 40, 40)
@@ -74,21 +73,20 @@ module IssuesSummaryGraphHelper
       if issue_map[(start_date + i).strftime('%Y%m%d')]
         y = y_base.to_f * (1 - (sum.to_f / top_issue_num.to_f))
       end
-      gc.fill(color)
-      gc.line(prev_x, prev_y, x, y)
-      gc.fill_opacity(0.7)
-      prev_x.to_i.upto(x.to_i) do |tmp_x|
-        tmp_y = (prev_y - y) / (prev_x - x) * tmp_x + y - (prev_y - y) / (prev_x - x) * x
-        gc.stroke('transparent').stroke_width(1).line(tmp_x, tmp_y, tmp_x, y_base)
-      end
-      gc.fill_opacity(1.0)
-      gc.line(prev_x, y_base, prev_x, prev_y)
       if (start_date + i).strftime('%d') == '01'
         gc.stroke('transparent').stroke_width(1)
         gc.fill('black').text(x.to_i - 20, SUMMARY_IMAGE_HEIGHT - 20, (start_date + i).strftime('%Y/%m'))
         gc.fill('lightgray').line(x.to_i, 0, x.to_i, y_base)
       end
 
+      gc.fill(color)
+      gc.line(prev_x, prev_y, x, y)
+      gc.fill_opacity(0.5)
+      (prev_x.floor + 1).upto(x.floor) do |tmp_x|
+        tmp_y = (prev_y - y) / (prev_x - x) * tmp_x + y - (prev_y - y) / (prev_x - x) * x
+        gc.stroke('transparent').stroke_width(1).line(tmp_x, tmp_y, tmp_x, y_base)
+      end
+      gc.fill_opacity(1.0)
       gc.stroke(color).stroke_width(2).fill(color).line(prev_x, prev_y, x, y)
       prev_x = x
       prev_y = y

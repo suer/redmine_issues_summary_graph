@@ -14,7 +14,7 @@
   </div>
 <% end %>
 </td>
-<td>
+<td id='graph_image'>
 <%= image_tag(url_for(:controller => 'issues_summary_graph', :action => 'summary_graph', :project_id => @project.identifier, :closed_issue_statuses => @closed_status_ids, :format => 'png')) %>
 </td>
 </tr>
