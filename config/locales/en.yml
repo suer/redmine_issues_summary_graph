@@ -1,3 +1,5 @@
 # English strings go here for Rails i18n
 en:
-  my_label: "My label"
+  menu_issues_summary_graph: TicketSummary
+  message_is_closed_select_status: Status as cloesed
+  reload: Reload
