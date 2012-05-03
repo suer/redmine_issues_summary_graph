@@ -2,7 +2,7 @@
 <table>
 <tr>
 <td class="issues-summary status-selection">
-<% form_tag :action => 'show' do |f| %>
+<%= form_tag :action => 'show' do |f| %>
   <div><%= l(:message_is_closed_select_status) %></div>
   <div>
     <%= select_tag :closed_status_ids,
