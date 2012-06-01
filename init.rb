@@ -4,7 +4,7 @@ Redmine::Plugin.register :redmine_issues_summary_graph do
   name 'Redmine Issues Summary Graph plugin'
   author 'suer'
   description 'issues summary graph'
-  version '0.0.2'
+  version '0.0.3'
   url 'https://github.com/suer/redmine_issues_summary_graph'
   author_url 'http://d.hatena.ne.jp/suer'
 
