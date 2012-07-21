@@ -5,17 +5,18 @@ A plugin for Redmine that shows an issues summary graph.
 Author
 ------------------------------
 * @suer
+* (thanks) @mallowlabs
 
 Install
 ------------------------------
 Type below command:
 
-    $ cd $RAILS_ROOT/vender/plugins
+    $ cd $RAILS_ROOT/plugins
     $ git clone git://github.com/suer/redmine_issues_summary_graph.git
 
 Requirements
 ------------------------------
-* Redmine 1.1 or later
+* Redmine 2.0 or later
 
 License
 ------------------------------
