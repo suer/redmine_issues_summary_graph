@@ -18,13 +18,13 @@ module IssuesSummaryGraphHelper
     issues = @project.issues
     issues.each do |issue|
       open_issue_map[issue.created_on.strftime('%Y%m%d')] ||= 0
-      open_issue_map[issue.created_on.strftime('%Y%m%d')] += 1 
+      open_issue_map[issue.created_on.strftime('%Y%m%d')] += 1
 
       closed_date = issue_closed_date(issue, closed_issue_status_ids)
       if closed_date
         closed_issue_map[closed_date.strftime('%Y%m%d')] ||= 0
         closed_issue_map[closed_date.strftime('%Y%m%d')] += 1
-      end      
+      end
     end
 
     sorted_open_issue_map = open_issue_map.sort
@@ -34,11 +34,11 @@ module IssuesSummaryGraphHelper
       imgl.format = 'PNG'
       return imgl.to_blob
     end
-    
+
     if sorted_open_issue_map.length == 0
       start_date = Date.parse(sorted_closed_issue_map[0][0])
       end_date = Date.parse(sorted_closed_issue_map[-1][0])
-    elsif sorted_closed_issue_map.length == 0 
+    elsif sorted_closed_issue_map.length == 0
       start_date = Date.parse(sorted_open_issue_map[0][0])
       end_date = Date.parse(sorted_open_issue_map[-1][0])
     else
@@ -49,7 +49,7 @@ module IssuesSummaryGraphHelper
     border(gc, issues.size)
     draw_line(open_issue_map, start_date, duration, gc, COLOR_ALL, issues.size)
     draw_line(closed_issue_map, start_date, duration, gc, COLOR_CLOSED, issues.size)
-    gc.stroke('transparent').fill('black').text(PADDING + 45, 25, 'all').text(PADDING + 45, 45, 'closed') 
+    gc.stroke('transparent').fill('black').text(PADDING + 45, 25, 'all').text(PADDING + 45, 45, 'closed')
     gc.stroke(COLOR_ALL).stroke_width(3).fill(COLOR_ALL).line(PADDING + 10, 20, PADDING + 40, 20)
     gc.stroke(COLOR_CLOSED).stroke_width(3).fill(COLOR_CLOSED).line(PADDING + 10, 40, PADDING + 40, 40)
 
@@ -63,7 +63,7 @@ module IssuesSummaryGraphHelper
     x_base = PADDING
     y_base = SUMMARY_IMAGE_HEIGHT - PADDING
     x = x_base
-    y = y_base 
+    y = y_base
     prev_x = x
     prev_y = y
     sum = 0
@@ -131,11 +131,11 @@ module IssuesSummaryGraphHelper
   def issue_closed_date(issue, closed_issue_status_ids)
     issue.journals.each do |journal|
       if journal.details.size == 0
-        return (closed_issue_status_ids.include?(issue.status.id) ? issue.updated_on : nil) 
+        return (closed_issue_status_ids.include?(issue.status.id) ? issue.updated_on : nil)
       end
       journal.details.each do |detail|
         next unless detail.prop_key == 'status_id'
-        if closed_issue_status_ids.include?(detail.value.to_i) 
+        if closed_issue_status_ids.include?(detail.value.to_i)
           return journal.created_on
         end
       end
