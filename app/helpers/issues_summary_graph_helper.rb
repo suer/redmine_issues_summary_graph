@@ -113,19 +113,14 @@ module IssuesSummaryGraphHelper
   end
 
   def border_step(issue_num)
-    return 1 if issue_num.to_s.size == 1
-    if issue_num.to_s.size == 2
+    return 1 if issue_num <= 10
+    digit = issue_num.to_s.size
+    if digit == 2
       return 5 if issue_num <= 50
       return 10
     end
-    upper_double_digit = (issue_num.to_f / (10 ** (issue_num.to_s.size - 2)).to_f).ceil
-    if upper_double_digit % 10 == 0
-      upper_double_digit / 10
-    elsif upper_double_digit % 10 <= 5
-      upper_double_digit / 10 * 10 + 5
-    else
-      upper_double_digit / 10 * 10 + 10
-    end
+    upper_double_digit = (issue_num.to_f / (10 ** 2).to_f).ceil
+    upper_double_digit * 10
   end
 
   def issue_closed_date(issue, closed_issue_status_ids)
