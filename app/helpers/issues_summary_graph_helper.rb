@@ -15,20 +15,23 @@ module IssuesSummaryGraphHelper
     gc.fill('black')
     closed_issue_map = {}
     open_issue_map = {}
-    issues = @project.issues
-    issues = issues.where(:created_on => from..to) if from and to
+    total_issue_num = 0
+    @projects.each do |project|
+      issues = project.issues
+      issues = issues.where(:created_on => from.to_date.beginning_of_day..to.to_date.end_of_day) if from and to
 
-    issues.each do |issue|
-      open_issue_map[issue.created_on.strftime('%Y%m%d')] ||= 0
-      open_issue_map[issue.created_on.strftime('%Y%m%d')] += 1
+      issues.each do |issue|
+        open_issue_map[issue.created_on.strftime('%Y%m%d')] ||= 0
+        open_issue_map[issue.created_on.strftime('%Y%m%d')] += 1
 
-      closed_date = issue_closed_date(issue, closed_issue_status_ids)
-      if closed_date
-        closed_issue_map[closed_date.strftime('%Y%m%d')] ||= 0
-        closed_issue_map[closed_date.strftime('%Y%m%d')] += 1
+        closed_date = issue_closed_date(issue, closed_issue_status_ids)
+        if closed_date
+          closed_issue_map[closed_date.strftime('%Y%m%d')] ||= 0
+          closed_issue_map[closed_date.strftime('%Y%m%d')] += 1
+        end
       end
+      total_issue_num += issues.size
     end
-
     sorted_open_issue_map = open_issue_map.sort
     sorted_closed_issue_map = closed_issue_map.sort
     if sorted_open_issue_map.length == 0 and sorted_closed_issue_map.length == 0
@@ -48,9 +51,9 @@ module IssuesSummaryGraphHelper
       end_date = Date.parse((sorted_open_issue_map[-1][0] > sorted_closed_issue_map[-1][0]) ? sorted_open_issue_map[-1][0] : sorted_closed_issue_map[-1][0])
     end
     duration = (end_date - start_date)
-    border(gc, issues.size)
-    draw_line(open_issue_map, start_date, duration, gc, COLOR_ALL, issues.size)
-    draw_line(closed_issue_map, start_date, duration, gc, COLOR_CLOSED, issues.size)
+    border(gc, total_issue_num)
+    draw_line(open_issue_map, start_date, duration, gc, COLOR_ALL, total_issue_num)
+    draw_line(closed_issue_map, start_date, duration, gc, COLOR_CLOSED, total_issue_num)
     gc.stroke('transparent').fill('black').text(PADDING + 45, 25, 'all').text(PADDING + 45, 45, 'closed')
     gc.stroke(COLOR_ALL).stroke_width(3).fill(COLOR_ALL).line(PADDING + 10, 20, PADDING + 40, 20)
     gc.stroke(COLOR_CLOSED).stroke_width(3).fill(COLOR_CLOSED).line(PADDING + 10, 40, PADDING + 40, 40)

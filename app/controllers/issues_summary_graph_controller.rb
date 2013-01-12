@@ -1,7 +1,7 @@
 class IssuesSummaryGraphController < ApplicationController
   unloadable
   include IssuesSummaryGraphHelper
-  before_filter :find_project
+  before_filter :find_projects
 
   DEFAULT_START_DATE = 6.month.ago
 
@@ -26,9 +26,11 @@ class IssuesSummaryGraphController < ApplicationController
   end
 
   private
-  def find_project
+  def find_projects
     project_id = (params[:issue] && params[:issue][:project_id]) || params[:project_id]
     @project = Project.find(project_id)
+    project_ids = @project.descendants.collect(&:id)
+    @projects = Project.find(project_ids.unshift(@project.id))
   rescue ActiveRecord::RecordNotFound
     render_404
   end
