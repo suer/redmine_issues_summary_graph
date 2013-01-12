@@ -8,7 +8,7 @@ class IssuesSummaryGraphController < ApplicationController
   def show
     @from = params[:from] || DEFAULT_START_DATE.strftime('%Y-%m-%d')
     @to = params[:to] || Date.today.strftime('%Y-%m-%d')
-    if params[:closed_status_ids] 
+    if params[:closed_status_ids]
       @closed_status_ids = params[:closed_status_ids].map {|id| id.to_i}
     else
       @closed_status_ids = IssueStatus.find(:all, :conditions => {:is_closed => true}).map {|status| status.id}
