@@ -10,12 +10,20 @@
       :multiple => true, :name => 'closed_status_ids[]' %>
   </div>
   <div>
+    <%= l(:field_start_date) %>:
+    <%= text_field_tag :from, @from, :size => 10 %><%= calendar_for('from') %>
+  </div>
+  <div>
+    <%= l(:description_date_to) %>:
+    <%= text_field_tag :to, @to, :size => 10 %><%= calendar_for('to') %>
+  </div>
+  <div>
     <%= submit_tag l(:reload) %>
   </div>
 <% end %>
 </td>
 <td id='graph_image'>
-<%= image_tag(url_for(:controller => 'issues_summary_graph', :action => 'summary_graph', :project_id => @project.identifier, :closed_issue_statuses => @closed_status_ids, :format => 'png')) %>
+<%= image_tag(url_for(:controller => 'issues_summary_graph', :action => 'summary_graph', :project_id => @project.identifier, :closed_issue_statuses => @closed_status_ids, :from => @from, :to => @to, :format => 'png')) %>
 </td>
 </tr>
 </table>
