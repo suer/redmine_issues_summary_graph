@@ -20,10 +20,8 @@ class IssuesSummaryGraphController < ApplicationController
   end
 
   def summary_graph
-    from = params[:from]
-    to = params[:to]
     closed_status_ids = params[:closed_issue_statuses].map {|id| id.to_i }
-    image = generate_summary_graph(closed_status_ids, from, to)
+    image = generate_summary_graph(closed_status_ids, params[:from], params[:to])
     respond_to do |format|
       format.png  { send_data(image, :disposition => 'inline', :type => 'image/png', :filename => "summary.png") }
     end

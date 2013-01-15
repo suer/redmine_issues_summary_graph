@@ -16,10 +16,15 @@ module IssuesSummaryGraphHelper
     closed_issue_map = {}
     open_issue_map = {}
     total_issue_num = 0
+
+    date_from = to_date(from)
+    date_to = to_date(to)
+
     @projects.each do |project|
       issues = project.issues
-      issues = issues.where("created_on >= ?", from.to_date.beginning_of_day) unless from.blank?
-      issues = issues.where("created_on <= ?", to.to_date.end_of_day) unless to.blank?
+
+      issues = issues.where("created_on >= ?", date_from.beginning_of_day) unless date_from.nil?
+      issues = issues.where("created_on <= ?", date_to.end_of_day) unless date_to.nil?
 
       issues.each do |issue|
         open_issue_map[issue.created_on.strftime('%Y%m%d')] ||= 0
@@ -143,4 +148,15 @@ module IssuesSummaryGraphHelper
     end
     closed_issue_status_ids.include?(issue.status.id) ? issue.updated_on : nil
   end
+
+  def to_date(str)
+    return nil if str.blank?
+
+    begin
+      str.to_date
+    rescue
+      nil
+    end
+  end
+
 end
