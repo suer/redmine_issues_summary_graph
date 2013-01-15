@@ -18,7 +18,8 @@ module IssuesSummaryGraphHelper
     total_issue_num = 0
     @projects.each do |project|
       issues = project.issues
-      issues = issues.where(:created_on => from.to_date.beginning_of_day..to.to_date.end_of_day) if from and to
+      issues = issues.where("created_on >= ?", from.to_date.beginning_of_day) unless from.blank?
+      issues = issues.where("created_on <= ?", to.to_date.end_of_day) unless to.blank?
 
       issues.each do |issue|
         open_issue_map[issue.created_on.strftime('%Y%m%d')] ||= 0

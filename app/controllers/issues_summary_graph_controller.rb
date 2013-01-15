@@ -6,8 +6,12 @@ class IssuesSummaryGraphController < ApplicationController
   DEFAULT_START_DATE = 6.month.ago
 
   def show
-    @from = params[:from] || DEFAULT_START_DATE.strftime('%Y-%m-%d')
-    @to = params[:to] || Date.today.strftime('%Y-%m-%d')
+    @from = params[:from]
+    @from = DEFAULT_START_DATE.strftime('%Y-%m-%d') if @from.blank? and request.get?
+
+    @to = params[:to]
+    @to = Date.today.strftime('%Y-%m-%d') if @to.blank? and request.get?
+
     if params[:closed_status_ids]
       @closed_status_ids = params[:closed_status_ids].map {|id| id.to_i}
     else
@@ -16,8 +20,8 @@ class IssuesSummaryGraphController < ApplicationController
   end
 
   def summary_graph
-    from = params[:from] || DEFAULT_START_DATE.strftime('%Y-%m-%d')
-    to = params[:to] || Date.today.strftime('%Y-%m-%d')
+    from = params[:from]
+    to = params[:to]
     closed_status_ids = params[:closed_issue_statuses].map {|id| id.to_i }
     image = generate_summary_graph(closed_status_ids, from, to)
     respond_to do |format|
