@@ -12,6 +12,8 @@ class IssuesSummaryGraphController < ApplicationController
     @to = params[:to]
     @to = Date.today.strftime('%Y-%m-%d') if @to.blank? and request.get?
 
+    @include_subproject = (params[:include_subproject].blank? ? false : true)
+
     if params[:closed_status_ids]
       @closed_status_ids = params[:closed_status_ids].map {|id| id.to_i}
     else
@@ -31,9 +33,14 @@ class IssuesSummaryGraphController < ApplicationController
   def find_projects
     project_id = (params[:issue] && params[:issue][:project_id]) || params[:project_id]
     @project = Project.find(project_id)
-    project_ids = @project.descendants.collect(&:id)
-    @projects = Project.find(project_ids.unshift(@project.id))
+    @projects = [@project]
+    @projects += @project.descendants if to_boolean(params[:include_subproject])
   rescue ActiveRecord::RecordNotFound
     render_404
+  end
+
+  def to_boolean(str)
+    return false if str.blank?
+    str.to_s == 'true'
   end
 end

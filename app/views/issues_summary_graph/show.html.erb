@@ -18,12 +18,16 @@
     <%= text_field_tag :to, @to, :size => 10 %><%= calendar_for('to') %>
   </div>
   <div>
+    <%= l(:include_subproject) %>:
+    <%= check_box_tag :include_subproject, true, @include_subproject %>
+  </div>
+  <div>
     <%= submit_tag l(:reload) %>
   </div>
 <% end %>
 </td>
 <td id='graph_image'>
-<%= image_tag(url_for(:controller => 'issues_summary_graph', :action => 'summary_graph', :project_id => @project.identifier, :closed_issue_statuses => @closed_status_ids, :from => @from, :to => @to, :format => 'png')) %>
+<%= image_tag(url_for(:controller => 'issues_summary_graph', :action => 'summary_graph', :project_id => @project.identifier, :closed_issue_statuses => @closed_status_ids, :from => @from, :to => @to, :include_subproject => @include_subproject, :format => 'png')) %>
 </td>
 </tr>
 </table>
