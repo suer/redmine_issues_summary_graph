@@ -1,5 +1,8 @@
 Redmine Issues Summary Graph Plugin
 ==============================
+
+[![Code Climate](https://codeclimate.com/github/suer/redmine_issues_summary_graph.png)](https://codeclimate.com/github/suer/redmine_issues_summary_graph)
+
 A plugin for Redmine that shows an issues summary graph.
 
 Author
