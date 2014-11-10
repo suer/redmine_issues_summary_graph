@@ -1,5 +1,7 @@
 # English strings go here for Rails i18n
 en:
+  project_module_issues_summary_graph: TicketSummary
   menu_issues_summary_graph: TicketSummary
   message_is_closed_select_status: Status as cloesed
   reload: Reload
+  include_subproject: Include Subproject
