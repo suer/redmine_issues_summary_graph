@@ -114,11 +114,13 @@ module IssuesSummaryGraphHelper
       gc.stroke('transparent').stroke_width(1).fill('lightgray')
       gc.line(PADDING, graph_height - margin * i + 1, graph_width, graph_height - margin * i)
       gc.stroke('transparent').stroke_width(1).fill('black')
-      gc.text(0, graph_height - margin * i, (step * i).to_i.to_s) if i != LINE_NUM
+      text = (step * i).to_i.to_s
+      metrics = gc.get_type_metrics(text)
+      text_height = (metrics.bounds.y2 - metrics.bounds.y1).round
+      gc.text(0, graph_height - margin * i + text_height, text)
     end
     gc.stroke('transparent').fill('lightgray')
     gc.line(PADDING, graph_height - 1, graph_width, graph_height - 1)
-    gc.stroke('transparent').fill('black').text(0, graph_height - 1, '0')
     gc.stroke('transparent').fill('lightgray').line(PADDING, 0, PADDING, graph_height)
     gc.line(graph_width, 0, graph_width, graph_height)
   end
