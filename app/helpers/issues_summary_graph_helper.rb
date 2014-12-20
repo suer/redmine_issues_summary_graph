@@ -132,8 +132,17 @@ module IssuesSummaryGraphHelper
       return 5 if issue_num <= 50
       return 10
     end
-    upper_double_digit = (issue_num.to_f / (10 ** 2).to_f).ceil
-    upper_double_digit * 10
+    if issue_num <= 2 * (10 ** (digit - 1))
+      step = 10 ** (digit - 2)
+    else
+      step = 10 ** (digit - 1)
+    end
+    max = step * (issue_num / step)
+    remainder = issue_num - (issue_num / step)
+    if remainder != 0
+      max = max + step
+    end
+    return (max / 10)
   end
 
   def issue_closed_date(issue, closed_issue_status_ids)
