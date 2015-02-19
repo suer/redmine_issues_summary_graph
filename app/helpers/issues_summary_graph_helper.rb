@@ -6,7 +6,7 @@ module IssuesSummaryGraphHelper
   COLOR_ALL = '#ffb6c1'
   COLOR_CLOSED = '#aae'
 
-  def generate_summary_graph(closed_issue_status_ids, from, to)
+  def generate_summary_graph(closed_issue_status_ids, version_ids, from, to)
     imgl = Magick::ImageList.new
     imgl.new_image(SUMMARY_IMAGE_WIDTH, SUMMARY_IMAGE_HEIGHT)
     gc = Magick::Draw.new
@@ -20,8 +20,15 @@ module IssuesSummaryGraphHelper
     date_from = to_date(from)
     date_to = to_date(to)
 
+
     @projects.each do |project|
       issues = project.issues
+
+      if version_ids.include? 0
+        issues = issues.where("fixed_version_id IS NULL OR fixed_version_id IN (?)", version_ids)
+      else
+        issues = issues.where("fixed_version_id IN (?)", version_ids)
+      end
 
       issues = issues.where("created_on >= ?", date_from.beginning_of_day) unless date_from.nil?
       issues = issues.where("created_on <= ?", date_to.end_of_day) unless date_to.nil?

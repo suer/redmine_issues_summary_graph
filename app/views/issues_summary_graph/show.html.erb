@@ -22,12 +22,18 @@
     <%= check_box_tag :include_subproject, true, @include_subproject %>
   </div>
   <div>
+    <%= l(:label_version) %>:
+    <%= select_tag :version_ids,
+      options_for_select([["", "0"]] + @projects.collect {|project| project.versions.collect {|version| [version.name, version.id]}}.flatten(1), @version_ids),
+      :multiple => true, :name => 'version_ids[]' %>
+  </div>
+  <div>
     <%= submit_tag l(:reload) %>
   </div>
 <% end %>
 </td>
 <td id='graph_image'>
-<%= image_tag(url_for(:controller => 'issues_summary_graph', :action => 'summary_graph', :project_id => @project.identifier, :closed_issue_statuses => @closed_status_ids, :from => @from, :to => @to, :include_subproject => @include_subproject, :format => 'png')) %>
+<%= image_tag(url_for(:controller => 'issues_summary_graph', :action => 'summary_graph', :project_id => @project.identifier, :closed_issue_statuses => @closed_status_ids, :versions => @version_ids, :from => @from, :to => @to, :include_subproject => @include_subproject, :format => 'png')) %>
 </td>
 </tr>
 </table>
