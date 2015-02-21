@@ -26,6 +26,8 @@ class IssuesSummaryGraphController < ApplicationController
       @version_ids = [ 0 ]
       @projects.each {|project| @version_ids += project.versions.map {|version| version.id.to_i}}
     end
+
+    @versions = @projects.collect {|project| project.versions }.flatten
   end
 
   def summary_graph

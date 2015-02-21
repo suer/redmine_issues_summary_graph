@@ -21,12 +21,14 @@
     <%= l(:include_subproject) %>:
     <%= check_box_tag :include_subproject, true, @include_subproject %>
   </div>
+  <% unless @versions.empty? %>
   <div>
     <%= l(:label_version) %>:
     <%= select_tag :version_ids,
-      options_for_select([["", "0"]] + @projects.collect {|project| project.versions.collect {|version| [version.name, version.id]}}.flatten(1), @version_ids),
+      options_for_select([["", "0"]] + @versions.collect {|version| [version.name, version.id]}, @version_ids),
       :multiple => true, :name => 'version_ids[]' %>
   </div>
+  <% end %>
   <div>
     <%= submit_tag l(:reload) %>
   </div>
