@@ -19,11 +19,19 @@ class IssuesSummaryGraphController < ApplicationController
     else
       @closed_status_ids = IssueStatus.find(:all, :conditions => {:is_closed => true}).map {|status| status.id}
     end
+
+    if params[:version_ids]
+      @version_ids = params[:version_ids].map {|id| id.to_i}
+    else
+      @version_ids = [ 0 ]
+      @projects.each {|project| @version_ids += project.versions.map {|version| version.id.to_i}}
+    end
   end
 
   def summary_graph
-    closed_status_ids = params[:closed_issue_statuses].map {|id| id.to_i }
-    image = generate_summary_graph(closed_status_ids, params[:from], params[:to])
+    closed_status_ids = params[:closed_issue_statuses].map {|id| id.to_i}
+    version_ids = params[:versions].map {|id| id.to_i}
+    image = generate_summary_graph(closed_status_ids, version_ids, params[:from], params[:to])
     respond_to do |format|
       format.png  { send_data(image, :disposition => 'inline', :type => 'image/png', :filename => "summary.png") }
     end
@@ -35,6 +43,7 @@ class IssuesSummaryGraphController < ApplicationController
     @project = Project.find(project_id)
     @projects = [@project]
     @projects += @project.descendants if to_boolean(params[:include_subproject])
+    @versions = @projects.collect{|project| project.versions}.flatten
   rescue ActiveRecord::RecordNotFound
     render_404
   end
