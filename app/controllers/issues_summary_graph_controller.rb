@@ -17,7 +17,7 @@ class IssuesSummaryGraphController < ApplicationController
     if params[:closed_status_ids]
       @closed_status_ids = params[:closed_status_ids].map {|id| id.to_i}
     else
-      @closed_status_ids = IssueStatus.find(:all, :conditions => {:is_closed => true}).map {|status| status.id}
+      @closed_status_ids = IssueStatus.where(:is_closed => true).map {|status| status.id}
     end
 
     if params[:version_ids]

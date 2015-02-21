@@ -6,7 +6,7 @@
   <div><%= l(:message_is_closed_select_status) %></div>
   <div>
     <%= select_tag :closed_status_ids,
-      options_for_select(IssueStatus.find(:all).collect {|status| [status.name, status.id]}, @closed_status_ids),
+      options_for_select(IssueStatus.all.collect {|status| [status.name, status.id]}, @closed_status_ids),
       :multiple => true, :name => 'closed_status_ids[]' %>
   </div>
   <div>
