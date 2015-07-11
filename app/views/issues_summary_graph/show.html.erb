@@ -35,11 +35,24 @@
 <% end %>
 </td>
 <td id='graph_image'>
+<p class="spinner">
+<%= image_tag("spinner.gif", :plugin => "redmine_issues_summary_graph", :style => 'width:40px;height:40px') %>
+</p>
+
+<p class="summary-graph">
 <%= image_tag(url_for(:controller => 'issues_summary_graph', :action => 'summary_graph', :project_id => @project.identifier, :closed_issue_statuses => @closed_status_ids, :versions => @version_ids, :from => @from, :to => @to, :include_subproject => @include_subproject, :format => 'png')) %>
+</p>
 </td>
 </tr>
 </table>
 
 <% content_for :header_tags do %>
   <%= stylesheet_link_tag "application.css", :plugin => "redmine_issues_summary_graph", :media => "screen" %>
+  <script type="text/javascript">
+    $(function() {
+      $('.summary-graph img').on('load', function() {
+        $('.spinner img').hide();
+      });
+    });
+  </script>
 <% end %>
