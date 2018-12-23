@@ -1,7 +1,7 @@
 class IssuesSummaryGraphController < ApplicationController
   unloadable
   include IssuesSummaryGraphHelper
-  before_filter :find_projects
+  before_action :find_projects
 
   DEFAULT_START_DATE = 6.month.ago
 
