@@ -19,7 +19,7 @@ Type below command:
 
 Requirements
 ------------------------------
-* Redmine 2.0 or later
+* Redmine 4.0 or later
 
 License
 ------------------------------
