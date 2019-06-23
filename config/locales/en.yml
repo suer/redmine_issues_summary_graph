@@ -3,5 +3,6 @@ en:
   project_module_issues_summary_graph: TicketSummary
   menu_issues_summary_graph: TicketSummary
   message_is_closed_select_status: Status as cloesed
+  message_is_tracker: Tracker
   reload: Reload
   include_subproject: Include Subproject

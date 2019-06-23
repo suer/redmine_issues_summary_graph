@@ -20,6 +20,12 @@ class IssuesSummaryGraphController < ApplicationController
       @closed_status_ids = IssueStatus.where(:is_closed => true).map {|status| status.id}
     end
 
+    if params[:tracker_ids]
+      @tracker_ids = params[:tracker_ids].map {|id| id.to_i}
+    else
+      @tracker_ids = Tracker.all.map {|tracker| tracker.id}
+    end
+
     if params[:version_ids]
       @version_ids = params[:version_ids].map {|id| id.to_i}
     else
@@ -32,8 +38,9 @@ class IssuesSummaryGraphController < ApplicationController
 
   def summary_graph
     closed_status_ids = (params[:closed_issue_statuses] || []).map {|id| id.to_i}
+    tracker_ids = (params[:tracker_ids] || []).map {|id| id.to_i}
     version_ids = params[:versions].map {|id| id.to_i}
-    image = generate_summary_graph(closed_status_ids, version_ids, params[:from], params[:to])
+    image = generate_summary_graph(closed_status_ids, tracker_ids, version_ids, params[:from], params[:to])
     respond_to do |format|
       format.png  { send_data(image, :disposition => 'inline', :type => 'image/png', :filename => "summary.png") }
     end

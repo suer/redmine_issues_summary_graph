@@ -9,6 +9,12 @@
       options_for_select(IssueStatus.all.collect {|status| [status.name, status.id]}, @closed_status_ids),
       :multiple => true, :name => 'closed_status_ids[]' %>
   </div>
+  <div><%= l(:message_is_tracker) %></div>
+  <div>
+    <%= select_tag :tracker_ids,
+      options_for_select(Tracker.all.collect {|tracker| [tracker.name, tracker.id]}, @tracker_ids),
+      :multiple => true, :name => 'tracker_ids[]' %>
+  </div>
   <div>
     <%= l(:field_start_date) %>:
     <%= text_field_tag :from, @from, :size => 10 %><%= calendar_for('from') %>
@@ -44,7 +50,7 @@
 </p>
 
 <p class="summary-graph">
-<%= image_tag(url_for(:controller => 'issues_summary_graph', :action => 'summary_graph', :project_id => @project.identifier, :closed_issue_statuses => @closed_status_ids, :versions => @version_ids, :from => @from, :to => @to, :include_subproject => @include_subproject, :format => 'png')) %>
+<%= image_tag(url_for(:controller => 'issues_summary_graph', :action => 'summary_graph', :project_id => @project.identifier, :closed_issue_statuses => @closed_status_ids, :tracker_ids => @tracker_ids, :versions => @version_ids, :from => @from, :to => @to, :include_subproject => @include_subproject, :format => 'png')) %>
 </p>
 </td>
 </tr>
