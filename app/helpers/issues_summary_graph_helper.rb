@@ -6,7 +6,7 @@ module IssuesSummaryGraphHelper
   COLOR_ALL = '#ffb6c1'
   COLOR_CLOSED = '#aae'
 
-  def generate_summary_graph(closed_issue_status_ids, version_ids, from, to)
+  def generate_summary_graph(closed_issue_status_ids, tracker_ids, version_ids, from, to)
     imgl = Magick::ImageList.new
     imgl.new_image(SUMMARY_IMAGE_WIDTH, SUMMARY_IMAGE_HEIGHT)
     gc = Magick::Draw.new
@@ -32,6 +32,8 @@ module IssuesSummaryGraphHelper
 
       issues = issues.where("created_on >= ?", date_from.beginning_of_day) unless date_from.nil?
       issues = issues.where("created_on <= ?", date_to.end_of_day) unless date_to.nil?
+
+      issues = issues.where("tracker_id IN (?)", tracker_ids)
 
       issues.each do |issue|
         open_issue_map[issue.created_on.strftime('%Y%m%d')] ||= 0

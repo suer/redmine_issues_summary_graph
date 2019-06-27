@@ -2,5 +2,6 @@ ja:
   project_module_issues_summary_graph: チケットサマリ
   menu_issues_summary_graph: チケットサマリ
   message_is_closed_select_status: 完了とみなすステータス
+  message_is_tracker: トラッカー
   reload: 更新
   include_subproject: サブプロジェクトを含む
