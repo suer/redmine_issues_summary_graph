@@ -7,12 +7,6 @@ module IssuesSummaryGraphHelper
   COLOR_CLOSED = '#aae'
 
   def generate_summary_graph(closed_issue_status_ids, tracker_ids, version_ids, from, to)
-    imgl = Magick::ImageList.new
-    imgl.new_image(SUMMARY_IMAGE_WIDTH, SUMMARY_IMAGE_HEIGHT)
-    gc = Magick::Draw.new
-
-    gc.stroke('transparent')
-    gc.fill('black')
     closed_issue_map = {}
     open_issue_map = {}
     total_issue_num = 0
@@ -50,6 +44,11 @@ module IssuesSummaryGraphHelper
     sorted_open_issue_map = open_issue_map.sort
     sorted_closed_issue_map = closed_issue_map.sort
     if sorted_open_issue_map.length == 0 and sorted_closed_issue_map.length == 0
+      imgl = Magick::ImageList.new
+      imgl.new_image(SUMMARY_IMAGE_WIDTH, SUMMARY_IMAGE_HEIGHT)
+      gc = Magick::Draw.new
+      gc.stroke('transparent')
+      gc.fill('black')
       gc.draw(imgl)
       imgl.format = 'PNG'
       return imgl.to_blob
@@ -66,6 +65,15 @@ module IssuesSummaryGraphHelper
       end_date = Date.parse((sorted_open_issue_map[-1][0] > sorted_closed_issue_map[-1][0]) ? sorted_open_issue_map[-1][0] : sorted_closed_issue_map[-1][0])
     end
     duration = (end_date - start_date)
+    draw_summary_graph(start_date, total_issue_num, open_issue_map, closed_issue_map, duration)
+  end
+
+  def draw_summary_graph(start_date, total_issue_num, open_issue_map,  closed_issue_map, duration)
+    imgl = Magick::ImageList.new
+    imgl.new_image(SUMMARY_IMAGE_WIDTH, SUMMARY_IMAGE_HEIGHT)
+    gc = Magick::Draw.new
+    gc.stroke('transparent')
+    gc.fill('black')
     border(gc, total_issue_num)
     draw_line(open_issue_map, start_date, duration, gc, COLOR_ALL, total_issue_num)
     draw_line(closed_issue_map, start_date, duration, gc, COLOR_CLOSED, total_issue_num)
