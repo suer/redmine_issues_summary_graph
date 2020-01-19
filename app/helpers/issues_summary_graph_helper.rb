@@ -44,14 +44,19 @@ module IssuesSummaryGraphHelper
     sorted_open_issue_map = open_issue_map.sort
     sorted_closed_issue_map = closed_issue_map.sort
     if sorted_open_issue_map.length == 0 and sorted_closed_issue_map.length == 0
-      imgl = Magick::ImageList.new
-      imgl.new_image(SUMMARY_IMAGE_WIDTH, SUMMARY_IMAGE_HEIGHT)
-      gc = Magick::Draw.new
-      gc.stroke('transparent')
-      gc.fill('black')
-      gc.draw(imgl)
-      imgl.format = 'PNG'
-      return imgl.to_blob
+      begin
+        img = MiniMagick::Image.create(".png", false)
+        MiniMagick::Tool::Convert.new do |gc|
+          gc.size('%dx%d' % [SUMMARY_IMAGE_WIDTH, SUMMARY_IMAGE_HEIGHT])
+          gc.xc('white')
+          gc.stroke('transparent')
+          gc.fill('black')
+          gc << img.path
+        end
+        return img.to_blob
+      ensure
+        img.destroy! if img
+      end
     end
 
     if sorted_open_issue_map.length == 0
@@ -69,21 +74,26 @@ module IssuesSummaryGraphHelper
   end
 
   def draw_summary_graph(start_date, total_issue_num, open_issue_map,  closed_issue_map, duration)
-    imgl = Magick::ImageList.new
-    imgl.new_image(SUMMARY_IMAGE_WIDTH, SUMMARY_IMAGE_HEIGHT)
-    gc = Magick::Draw.new
-    gc.stroke('transparent')
-    gc.fill('black')
-    border(gc, total_issue_num)
-    draw_line(open_issue_map, start_date, duration, gc, COLOR_ALL, total_issue_num)
-    draw_line(closed_issue_map, start_date, duration, gc, COLOR_CLOSED, total_issue_num)
-    gc.stroke('transparent').fill('black').text(PADDING + 45, 25, 'all').text(PADDING + 45, 45, 'closed')
-    gc.stroke(COLOR_ALL).stroke_width(3).fill(COLOR_ALL).line(PADDING + 10, 20, PADDING + 40, 20)
-    gc.stroke(COLOR_CLOSED).stroke_width(3).fill(COLOR_CLOSED).line(PADDING + 10, 40, PADDING + 40, 40)
+    img = MiniMagick::Image.create(".png", false)
+    MiniMagick::Tool::Convert.new do |gc|
+      gc.size('%dx%d' % [SUMMARY_IMAGE_WIDTH, SUMMARY_IMAGE_HEIGHT])
+      gc.xc('white')
+      gc.stroke('transparent')
+      gc.fill('black')
+      border(gc, total_issue_num)
+      draw_line(open_issue_map, start_date, duration, gc, COLOR_ALL, total_issue_num)
+      draw_line(closed_issue_map, start_date, duration, gc, COLOR_CLOSED, total_issue_num)
+      gc.stroke('transparent').fill('black')
+      gc.draw('text %d,%d %s' % [PADDING + 45, 25, Redmine::Utils::Shell.shell_quote('all')])
+      gc.draw('text %d,%d %s' % [PADDING + 45, 45, Redmine::Utils::Shell.shell_quote('closed')])
+      gc.stroke(COLOR_ALL).strokewidth(3).fill(COLOR_ALL).draw('line %g,%g %g,%g' % [PADDING + 10, 20, PADDING + 40, 20])
+      gc.stroke(COLOR_CLOSED).strokewidth(3).fill(COLOR_CLOSED).draw('line %g,%g %g,%g' % [PADDING + 10, 40, PADDING + 40, 40])
+      gc << img.path
+    end
 
-    gc.draw(imgl)
-    imgl.format = 'PNG'
-    imgl.to_blob
+    img.to_blob
+  ensure
+    img.destroy! if img
   end
 
   def draw_line(issue_map, start_date, duration, gc, color, issue_num)
@@ -102,20 +112,19 @@ module IssuesSummaryGraphHelper
         y = y_base.to_f * (1 - (sum.to_f / top_issue_num.to_f))
       end
       if (start_date + i).strftime('%d') == '01'
-        gc.stroke('transparent').stroke_width(1)
-        gc.fill('black').text(x.to_i - 20, SUMMARY_IMAGE_HEIGHT - 20, (start_date + i).strftime('%Y/%m'))
-        gc.fill('lightgray').line(x.to_i, 0, x.to_i, y_base)
+        gc.stroke('transparent').strokewidth(1)
+        gc.fill('black')
+        gc.draw('text %d,%d %s' % [x.to_i - 20, SUMMARY_IMAGE_HEIGHT - 20, Redmine::Utils::Shell.shell_quote((start_date + i).strftime('%Y/%m'))])
+        gc.fill('lightgray').draw('line %g,%g %g,%g' % [x.to_i, 0, x.to_i, y_base])
       end
 
       gc.fill(color)
-      gc.line(prev_x, prev_y, x, y)
-      gc.fill_opacity(0.5)
+      gc.draw('line %g,%g %g,%g' % [prev_x, prev_y, x, y])
       (prev_x.floor + 1).upto(x.floor) do |tmp_x|
         tmp_y = (prev_y - y) / (prev_x - x) * tmp_x + y - (prev_y - y) / (prev_x - x) * x
-        gc.stroke('transparent').stroke_width(1).line(tmp_x, tmp_y, tmp_x, y_base)
+        gc.stroke('transparent').strokewidth(1).draw("fill-opacity 0.5\nline %g,%g %g,%g" % [tmp_x, tmp_y, tmp_x, y_base])
       end
-      gc.fill_opacity(1.0)
-      gc.stroke(color).stroke_width(2).fill(color).line(prev_x, prev_y, x, y)
+      gc.stroke(color).strokewidth(2).fill(color).draw('line %g,%g %g,%g' % [prev_x, prev_y, x, y])
       prev_x = x
       prev_y = y
     end
@@ -127,19 +136,17 @@ module IssuesSummaryGraphHelper
     margin = (graph_height / LINE_NUM).to_i
     step = border_step(issue_num)
     (LINE_NUM + 1).times do |i|
-      height = (i == 0 ? (graph_height - 1) : ((graph_height - PADDING) / LINE_NUM) * i)
-      gc.stroke('transparent').stroke_width(1).fill('lightgray')
-      gc.line(PADDING, graph_height - margin * i + 1, graph_width, graph_height - margin * i)
-      gc.stroke('transparent').stroke_width(1).fill('black')
+      gc.stroke('transparent').strokewidth(1).fill('lightgray')
+      gc.draw('line %g,%g %g,%g' % [PADDING, graph_height - margin * i + 1, graph_width, graph_height - margin * i])
+      gc.stroke('transparent').strokewidth(1).fill('black')
       text = (step * i).to_i.to_s
-      metrics = gc.get_type_metrics(text)
-      text_height = (metrics.bounds.y2 - metrics.bounds.y1).round
-      gc.text(0, graph_height - margin * i + text_height, text)
+      text_height = 9
+      gc.draw('text %d,%d %s' % [0, graph_height - margin * i + text_height, Redmine::Utils::Shell.shell_quote(text)])
     end
     gc.stroke('transparent').fill('lightgray')
-    gc.line(PADDING, graph_height - 1, graph_width, graph_height - 1)
-    gc.stroke('transparent').fill('lightgray').line(PADDING, 0, PADDING, graph_height)
-    gc.line(graph_width, 0, graph_width, graph_height)
+    gc.draw('line %g,%g %g,%g' % [PADDING, graph_height - 1, graph_width, graph_height - 1])
+    gc.stroke('transparent').fill('lightgray').draw('line %g,%g %g,%g' % [PADDING, 0, PADDING, graph_height])
+    gc.draw('line %g,%g %g,%g' % [graph_width, 0, graph_width, graph_height])
   end
 
   def border_step(issue_num)
