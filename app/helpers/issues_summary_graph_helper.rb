@@ -44,19 +44,7 @@ module IssuesSummaryGraphHelper
     sorted_open_issue_map = open_issue_map.sort
     sorted_closed_issue_map = closed_issue_map.sort
     if sorted_open_issue_map.length == 0 and sorted_closed_issue_map.length == 0
-      begin
-        img = MiniMagick::Image.create(".png", false)
-        MiniMagick::Tool::Convert.new do |gc|
-          gc.size('%dx%d' % [SUMMARY_IMAGE_WIDTH, SUMMARY_IMAGE_HEIGHT])
-          gc.xc('white')
-          gc.stroke('transparent')
-          gc.fill('black')
-          gc << img.path
-        end
-        return img.to_blob
-      ensure
-        img.destroy! if img
-      end
+      return draw_empty_image
     end
 
     if sorted_open_issue_map.length == 0
@@ -71,6 +59,20 @@ module IssuesSummaryGraphHelper
     end
     duration = (end_date - start_date)
     draw_summary_graph(start_date, total_issue_num, open_issue_map, closed_issue_map, duration)
+  end
+
+  def draw_empty_image
+    img = MiniMagick::Image.create(".png", false)
+    MiniMagick::Tool::Convert.new do |gc|
+      gc.size('%dx%d' % [SUMMARY_IMAGE_WIDTH, SUMMARY_IMAGE_HEIGHT])
+      gc.xc('white')
+      gc.stroke('transparent')
+      gc.fill('black')
+      gc << img.path
+    end
+    img.to_blob
+  ensure
+    img.destroy! if img
   end
 
   def draw_summary_graph(start_date, total_issue_num, open_issue_map,  closed_issue_map, duration)
