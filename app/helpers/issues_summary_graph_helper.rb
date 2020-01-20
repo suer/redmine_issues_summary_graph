@@ -107,6 +107,8 @@ module IssuesSummaryGraphHelper
     prev_x = x
     prev_y = y
     sum = 0
+    polyline_points = []
+    polyline_points << '%g,%g' % [prev_x, prev_y]
     (duration + 1).to_i.times do |i|
       x += ((SUMMARY_IMAGE_WIDTH - PADDING * 2) / (duration + 1))
       sum += issue_map[(start_date + i).strftime('%Y%m%d')] || 0
@@ -120,16 +122,16 @@ module IssuesSummaryGraphHelper
         gc.fill('lightgray').draw('line %g,%g %g,%g' % [x.to_i, 0, x.to_i, y_base])
       end
 
-      gc.fill(color)
-      gc.draw('line %g,%g %g,%g' % [prev_x, prev_y, x, y])
-      (prev_x.floor + 1).upto(x.floor) do |tmp_x|
-        tmp_y = (prev_y - y) / (prev_x - x) * tmp_x + y - (prev_y - y) / (prev_x - x) * x
-        gc.stroke('transparent').strokewidth(1).draw("fill-opacity 0.5\nline %g,%g %g,%g" % [tmp_x, tmp_y, tmp_x, y_base])
-      end
-      gc.stroke(color).strokewidth(2).fill(color).draw('line %g,%g %g,%g' % [prev_x, prev_y, x, y])
+      polyline_points << '%g,%g' % [x, y]
       prev_x = x
       prev_y = y
     end
+
+    gc.stroke(color).strokewidth(2).fill('none').draw("polyline #{polyline_points.join(' ')}")
+
+    polygon_points = polyline_points + ['%g,%g' % [x, y_base]]
+    polygon_command = "fill-opacity 0.5\npolygon #{polygon_points.join(' ')}"
+    gc.strokewidth(0).fill(color).draw(polygon_command)
   end
 
   def border(gc, issue_num)
