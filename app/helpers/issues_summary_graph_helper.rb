@@ -116,10 +116,12 @@ module IssuesSummaryGraphHelper
         y = y_base.to_f * (1 - (sum.to_f / top_issue_num.to_f))
       end
       if (start_date + i).strftime('%d') == '01'
-        gc.stroke('transparent').strokewidth(1)
-        gc.fill('black')
-        gc.draw('text %d,%d %s' % [x.to_i - 20, SUMMARY_IMAGE_HEIGHT - 20, Redmine::Utils::Shell.shell_quote((start_date + i).strftime('%Y/%m'))])
-        gc.fill('lightgray').draw('line %g,%g %g,%g' % [x.to_i, 0, x.to_i, y_base])
+        if duration.days < 2.years || (start_date + i).strftime('%m') == '01'
+          gc.stroke('transparent').strokewidth(1)
+          gc.fill('black')
+          gc.draw('text %d,%d %s' % [x.to_i - 20, SUMMARY_IMAGE_HEIGHT - 20, Redmine::Utils::Shell.shell_quote((start_date + i).strftime('%Y/%m'))])
+          gc.fill('lightgray').draw('line %g,%g %g,%g' % [x.to_i, 0, x.to_i, y_base])
+        end
       end
 
       # skip duplicate points to reduce data
