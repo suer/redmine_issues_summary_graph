@@ -122,7 +122,12 @@ module IssuesSummaryGraphHelper
         gc.fill('lightgray').draw('line %g,%g %g,%g' % [x.to_i, 0, x.to_i, y_base])
       end
 
-      polyline_points << '%g,%g' % [x, y]
+      # skip duplicate points to reduce data
+      skip_point = duration > SUMMARY_IMAGE_WIDTH - PADDING &&
+                     i  % ((duration / (SUMMARY_IMAGE_WIDTH - PADDING)).ceil) != 0 &&
+                     i != 0 && i != duration
+      polyline_points << '%g,%g' % [x, y] unless skip_point
+
       prev_x = x
       prev_y = y
     end
