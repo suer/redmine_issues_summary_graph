@@ -128,7 +128,7 @@ module IssuesSummaryGraphHelper
       skip_point = duration > SUMMARY_IMAGE_WIDTH - PADDING &&
                      i  % ((duration / (SUMMARY_IMAGE_WIDTH - PADDING)).ceil) != 0 &&
                      i != 0 && i != duration
-      polyline_points << '%g,%g' % [x, y] unless skip_point
+      polyline_points << '%g,%g' % [x.to_i, y.to_i] unless skip_point
 
       prev_x = x
       prev_y = y
