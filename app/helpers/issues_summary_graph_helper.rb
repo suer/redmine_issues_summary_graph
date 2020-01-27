@@ -94,6 +94,23 @@ module IssuesSummaryGraphHelper
     end
 
     img.to_blob
+  rescue
+    MiniMagick::Tool::Convert.new do |gc|
+      gc.size('%dx%d' % [SUMMARY_IMAGE_WIDTH, SUMMARY_IMAGE_HEIGHT])
+      gc.xc('white')
+      gc.stroke('transparent').fill('red')
+      font_path = Redmine::Configuration['minimagick_font_path'].presence
+      if font_path.present?
+        gc.font(font_path)
+        gc.draw('text %d,%d %s' % [PADDING + 45, 25, Redmine::Utils::Shell.shell_quote(l(:message_generate_graph_failed))])
+      else
+        gc.draw('text %d,%d %s' % [PADDING + 45, 25, Redmine::Utils::Shell.shell_quote(ll(:en, :message_generate_graph_failed))])
+      end
+
+      gc << img.path
+    end
+
+    img.to_blob
   ensure
     img.destroy! if img
   end
