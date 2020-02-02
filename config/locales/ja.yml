@@ -5,3 +5,7 @@ ja:
   message_is_tracker: トラッカー
   reload: 更新
   include_subproject: サブプロジェクトを含む
+  message_generate_graph_failed: |-
+    グラフの作成に失敗しました.
+    指定した期間にデータが多すぎる可能性があります.
+    期間を短くしてください.

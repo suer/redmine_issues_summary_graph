@@ -6,3 +6,7 @@ en:
   message_is_tracker: Tracker
   reload: Reload
   include_subproject: Include Subproject
+  message_generate_graph_failed: |-
+    Graph geneneration failed.
+    There may be too much data for the specified date range.
+    Please specify shorter range.
